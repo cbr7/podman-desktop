@@ -16,16 +16,15 @@
  * SPDX-License-Identifier: Apache-2.0
  ***********************************************************************/
 
+import { test as setup } from '@playwright/test';
+
 import { Runner } from '../runner/podman-desktop-runner';
 
-async function globalTeardown(): Promise<void> {
+setup('global setup', async () => {
   if (process.env.USE_GLOBAL_RUNNER === 'true') {
-    const singletonInstance = await Runner.getInstance();
-    await singletonInstance.close();
+    await (await Runner.getInstance()).close();
     console.log('Global teardown - Runner instance closed');
   } else {
     console.log('Global teardown - skipped due to environment variable');
   }
-}
-
-export default globalTeardown;
+});

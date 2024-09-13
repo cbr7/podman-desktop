@@ -16,15 +16,15 @@
  * SPDX-License-Identifier: Apache-2.0
  ***********************************************************************/
 
+import { test as setup } from '@playwright/test';
+
 import { Runner } from '../runner/podman-desktop-runner';
 
-async function globalSetup(): Promise<void> {
+setup('global setup', async () => {
   if (process.env.USE_GLOBAL_RUNNER === 'true') {
     await Runner.getInstance();
-    console.log('Global setup - Runner instance created');
+    console.log('Global setup - Runner instance started');
   } else {
     console.log('Global setup - skipped due to environment variable');
   }
-}
-
-export default globalSetup;
+});
