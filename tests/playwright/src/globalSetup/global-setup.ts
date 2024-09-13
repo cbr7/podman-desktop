@@ -1,5 +1,5 @@
 /**********************************************************************
- * Copyright (C) 2023 Red Hat, Inc.
+ * Copyright (C) 2023-2024 Red Hat, Inc.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,30 +16,15 @@
  * SPDX-License-Identifier: Apache-2.0
  ***********************************************************************/
 
-import { removeFolderIfExists } from '../utility/cleanup';
+import { Runner } from '../runner/podman-desktop-runner';
 
-let setupCalled = false;
-let teardownCalled = false;
-
-export async function setup(): Promise<void> {
-  if (!setupCalled) {
-    // remove all previous testing output files
-    // Junit reporter output file is created before we can clean up output folders
-    // It is not possible to remove junit output file because it is opened by the process already, at least on windows
-    if (!process.env.CI && !process.env.SKIP_REMOVE_FOLDER) {
-      await removeFolderIfExists('tests/output');
-    } else {
-      console.log(
-        `On CI, skipping before All tests/output cleanup, see https://github.com/containers/podman-desktop/issues/5460`,
-      );
-    }
-    setupCalled = true;
+async function globalSetup(): Promise<void> {
+  if (process.env.USE_GLOBAL_RUNNER === 'true') {
+    await Runner.getInstance();
+    console.log('Global setup - Runner instance created');
+  } else {
+    console.log('Global setup - skipped due to environment variable');
   }
 }
 
-export async function teardown(): Promise<void> {
-  if (!teardownCalled) {
-    // here comes teardown logic
-    teardownCalled = true;
-  }
-}
+export default globalSetup;

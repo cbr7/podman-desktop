@@ -33,6 +33,7 @@ const containerList = ['first', 'second', 'third'];
 const containerStartParams: ContainerInteractiveParams = { attachTerminal: false };
 
 test.beforeAll(async ({ runner, welcomePage, page }) => {
+  await runner.startTracing();
   runner.setVideoAndTraceName('containers-e2e');
   await welcomePage.handleWelcomePage(true);
   await waitForPodmanMachineStartup(page);
@@ -67,7 +68,7 @@ test.afterAll(async ({ runner, page }) => {
 
     await deleteImage(page, imageToPull);
   } finally {
-    await runner.close();
+    await runner.stopTracing();
   }
 });
 

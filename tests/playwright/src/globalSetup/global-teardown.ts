@@ -16,28 +16,16 @@
  * SPDX-License-Identifier: Apache-2.0
  ***********************************************************************/
 
-import { defineConfig, devices } from '@playwright/test';
+import { Runner } from '../runner/podman-desktop-runner';
 
-export default defineConfig({
-  globalSetup: require.resolve('./tests/playwright/src/globalSetup/global-setup.ts'),
-  globalTeardown: require.resolve('./tests/playwright/src/globalSetup/global-teardown.ts'),
-  outputDir: 'tests/playwright/output/',
-  workers: 1,
-  timeout: 60000,
+async function globalTeardown(): Promise<void> {
+  if (process.env.USE_GLOBAL_RUNNER === 'true') {
+    const singletonInstance = await Runner.getInstance();
+    await singletonInstance.close();
+    console.log('Global teardown - Runner instance closed');
+  } else {
+    console.log('Global teardown - skipped due to environment variable');
+  }
+}
 
-  reporter: [
-    ['list'],
-    ['junit', { outputFile: 'tests/playwright/output/junit-results.xml' }],
-    ['json', { outputFile: 'tests/playwright/output/json-results.json' }],
-    ['html', { open: 'never', outputFolder: 'tests/playwright/output/html-results/' }],
-  ],
-
-  projects: [
-    {
-      name: 'chromium',
-      use: {
-        ...devices['Desktop Chrome'],
-      },
-    },
-  ],
-});
+export default globalTeardown;

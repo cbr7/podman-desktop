@@ -112,7 +112,7 @@ export class Runner {
     this.getPage().on('console', console.log);
 
     // Start playwright tracing
-    await this.startTracing();
+    //await this.startTracing();
 
     // also get stderr from the node process
     this._app.process().stderr?.on('data', data => {
@@ -158,6 +158,14 @@ export class Runner {
     await this.getPage()
       .context()
       .tracing.stop({ path: join(this._testOutput, 'traces', name) });
+
+    if (this._videoAndTraceName) {
+      const videoPath = join(this._testOutput, 'videos', `${this._videoAndTraceName}.webm`);
+      const elapsed = await this.trackTime(async () => await this.saveVideoAs(videoPath));
+      console.log(`Saving a video file took: ${elapsed} ms`);
+      console.log(`Video file saved as: ${videoPath}`);
+    }
+    await this.removeTracesOnFinished();
   }
 
   public async getBrowserWindowState(): Promise<WindowState> {
@@ -229,14 +237,6 @@ export class Runner {
     }
     this._running = false;
     Runner._instance = undefined;
-
-    if (this._videoAndTraceName) {
-      const videoPath = join(this._testOutput, 'videos', `${this._videoAndTraceName}.webm`);
-      const elapsed = await this.trackTime(async () => await this.saveVideoAs(videoPath));
-      console.log(`Saving a video file took: ${elapsed} ms`);
-      console.log(`Video file saved as: ${videoPath}`);
-    }
-    await this.removeTracesOnFinished();
   }
 
   async removeTracesOnFinished(): Promise<void> {
